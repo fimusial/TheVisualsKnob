@@ -1,0 +1,15 @@
+*
+!.gitignore
+!.gitattributes
+
+!cmrc/
+!resource/
+!source/
+
+!*.h
+!*.cpp
+!*.json
+!*.bmp
+!*.cmake
+!*.txt
+!*.md
