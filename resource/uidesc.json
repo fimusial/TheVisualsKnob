@@ -13,13 +13,16 @@
         "templates": {
             "view": {
                 "attributes": {
+                    "autosize": "left right top bottom",
                     "background-color": "#ff0000ff",
                     "background-color-draw-style": "filled",
                     "class": "CViewContainer",
                     "mouse-enabled": "true",
                     "opacity": "1",
                     "origin": "0, 0",
-                    "size": "1000, 1000",
+                    "size": "800, 800",
+                    "minSize": "300, 300",
+                    "maxSize": "3840, 2160",
                     "transparent": "false",
                     "wants-focus": "false"
                 },
