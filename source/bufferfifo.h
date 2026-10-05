@@ -7,15 +7,6 @@
 template<typename T>
 struct BufferFifo
 {
-    void prepare(std::size_t bufferCapacity)
-    {
-        for (auto& buffer : buffers)
-        {
-            buffer.clear();
-            buffer.resize(bufferCapacity, 0.0f);
-        }
-    }
-
     bool tryPush(const std::vector<T>& buffer)
     {
         const size_t write = writeIndex.load(std::memory_order_relaxed);

@@ -2,6 +2,8 @@
 
 #include "public.sdk/source/vst/vstaudioeffect.h"
 
+#include "bufferfifo.h"
+
 using namespace Steinberg;
 using namespace Vst;
 
@@ -29,6 +31,14 @@ namespace TVK
         tresult PLUGIN_API process(ProcessData& data) SMTG_OVERRIDE;
 
     private:
+        bool skipSilentBlocks = true;
+        int dataWindowSize = 4096;
         int channelCount = 0;
+
+        std::vector<double>* accumulators = nullptr;
+        BufferFifo<double>* fifos = nullptr;
+
+        bool transferToOutput(ProcessData& data);
+        void publishBlocks(ProcessData& data);
     };
 }

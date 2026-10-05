@@ -11,6 +11,15 @@ namespace TVK
 
     TheVisualsKnobProcessor::~TheVisualsKnobProcessor()
     {
+        if (accumulators)
+        {
+            delete[] accumulators;
+        }
+
+        if (fifos)
+        {
+            delete[] fifos;
+        }
     }
 
     tresult PLUGIN_API TheVisualsKnobProcessor::initialize(FUnknown* context)
@@ -65,7 +74,29 @@ namespace TVK
 
     tresult PLUGIN_API TheVisualsKnobProcessor::setupProcessing(ProcessSetup& newSetup)
     {
-        return AudioEffect::setupProcessing(newSetup);
+        tresult result = AudioEffect::setupProcessing(newSetup);
+        if (result != kResultOk)
+        {
+            return result;
+        }
+
+        if (channelCount < 1)
+        {
+            return kResultOk;
+        }
+
+        if (!accumulators && !fifos)
+        {
+            accumulators = new std::vector<double>[channelCount];
+            fifos = new BufferFifo<double>[channelCount];
+
+            for (int channel = 0; channel < channelCount; channel++)
+            {
+                accumulators[channel].reserve(dataWindowSize);
+            }
+        }
+
+        return kResultOk;
     }
 
     tresult PLUGIN_API TheVisualsKnobProcessor::setActive(TBool state)
@@ -85,30 +116,89 @@ namespace TVK
 
     tresult PLUGIN_API TheVisualsKnobProcessor::process(ProcessData& data)
     {
-        if (data.numInputs == 0 || data.numOutputs == 0 || data.numSamples == 0)
+        if (processSetup.symbolicSampleSize != data.symbolicSampleSize)
+        {
+            return kInvalidArgument;
+        }
+
+        if (processSetup.processMode != kRealtime)
         {
             return kResultOk;
         }
 
+        if (data.numInputs < 1 || data.numOutputs < 1 || data.numSamples < 1 || channelCount < 1)
+        {
+            return kResultOk;
+        }
+
+        bool isSilentOrEmpty = transferToOutput(data);
+
+        if (!skipSilentBlocks || !isSilentOrEmpty)
+        {
+            publishBlocks(data);
+        }
+
+        return kResultOk;
+    }
+
+    bool TheVisualsKnobProcessor::transferToOutput(ProcessData& data)
+    {
+        bool isSilentOrEmpty = true;
         for (int channel = 0; channel < channelCount; channel++)
         {
-            if (data.symbolicSampleSize == kSample32)
+            for (int index = 0; index < data.numSamples; index++)
             {
-                for (int i = 0; i < data.numSamples; i++)
+                if (processSetup.symbolicSampleSize == kSample32)
                 {
-                    data.outputs[0].channelBuffers32[channel][i] = data.inputs[0].channelBuffers32[channel][i];
+                    float sample32 = data.inputs[0].channelBuffers32[channel][index];
+                    data.outputs[0].channelBuffers32[channel][index] = sample32;
+                    isSilentOrEmpty = sample32 != 0.0f ? false : isSilentOrEmpty;
                 }
-            }
-            else
-            {
-                for (int i = 0; i < data.numSamples; i++)
+
+                if (processSetup.symbolicSampleSize == kSample64)
                 {
-                    data.outputs[0].channelBuffers64[channel][i] = data.inputs[0].channelBuffers64[channel][i];
+                    double sample64 = data.inputs[0].channelBuffers64[channel][index];
+                    data.outputs[0].channelBuffers64[channel][index] = sample64;
+                    isSilentOrEmpty = sample64 != 0.0f ? false : isSilentOrEmpty;
                 }
             }
         }
 
         data.outputs[0].silenceFlags = data.inputs[0].silenceFlags;
-        return kResultOk;
+        return isSilentOrEmpty;
+    }
+
+    void TheVisualsKnobProcessor::publishBlocks(ProcessData& data)
+    {
+        for (int channel = 0; channel < channelCount; channel++)
+        {
+            for (int index = 0; index < data.numSamples; index++)
+            {
+                double sample = 0.0;
+
+                if (processSetup.symbolicSampleSize == kSample32)
+                {
+                    sample = data.inputs[0].channelBuffers32[channel][index];
+                }
+
+                if (processSetup.symbolicSampleSize == kSample64)
+                {
+                    sample = data.inputs[0].channelBuffers64[channel][index];
+                }
+
+                accumulators[channel].push_back(sample);
+
+                if (accumulators[channel].size() > dataWindowSize)
+                {
+                    accumulators[channel].resize(dataWindowSize);
+                }
+
+                if (accumulators[channel].size() == dataWindowSize)
+                {
+                    fifos[channel].tryPush(accumulators[channel]);
+                    accumulators[channel].clear();
+                }
+            }
+        }
     }
 }
