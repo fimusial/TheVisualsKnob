@@ -5,6 +5,7 @@
 namespace TVK
 {
     TheVisualsKnobProcessor::TheVisualsKnobProcessor()
+        : visualizerFactory(*this)
     {
         setControllerClass(kTheVisualsKnobControllerUID);
     }
@@ -16,9 +17,9 @@ namespace TVK
             delete[] accumulators;
         }
 
-        if (fifos)
+        if (bufferFifos)
         {
-            delete[] fifos;
+            delete[] bufferFifos;
         }
     }
 
@@ -85,14 +86,14 @@ namespace TVK
             return kResultOk;
         }
 
-        if (!accumulators && !fifos)
+        if (!accumulators && !bufferFifos)
         {
             accumulators = new std::vector<double>[channelCount];
-            fifos = new BufferFifo<double>[channelCount];
+            bufferFifos = new BufferFifo<double>[channelCount];
 
             for (int channel = 0; channel < channelCount; channel++)
             {
-                accumulators[channel].reserve(dataWindowSize);
+                accumulators[channel].reserve(bufferSize);
             }
         }
 
@@ -133,12 +134,57 @@ namespace TVK
 
         bool isSilentOrEmpty = transferToOutput(data);
 
-        if (!skipSilentBlocks || !isSilentOrEmpty)
+        if (!skipSilentBuffers || !isSilentOrEmpty)
         {
-            publishBlocks(data);
+            publishBuffers(data);
         }
 
         return kResultOk;
+    }
+
+    int TheVisualsKnobProcessor::getChannelCount()
+    {
+        return channelCount;
+    }
+
+    int TheVisualsKnobProcessor::getBufferSize()
+    {
+        return bufferSize;
+    }
+
+    int TheVisualsKnobProcessor::getAvailableBufferCount(int channel)
+    {
+        if (channel >= channelCount)
+        {
+            return -1;
+        }
+
+        bufferFifos[channel].getAvailablePullCount();
+    }
+
+    bool TheVisualsKnobProcessor::tryGetBuffer(int channel, std::vector<double>& buffer)
+    {
+        if (channel >= channelCount)
+        {
+            return -1;
+        }
+
+        return bufferFifos[channel].tryPull(buffer);
+    }
+
+    void TheVisualsKnobProcessor::setSkipBuffers(bool newValue)
+    {
+        skipSilentBuffers = newValue;
+    }
+
+    void TheVisualsKnobProcessor::setBufferSize(int newValue)
+    {
+        if (newValue < 1)
+        {
+            return;
+        }
+
+        bufferSize = newValue;
     }
 
     bool TheVisualsKnobProcessor::transferToOutput(ProcessData& data)
@@ -168,7 +214,7 @@ namespace TVK
         return isSilentOrEmpty;
     }
 
-    void TheVisualsKnobProcessor::publishBlocks(ProcessData& data)
+    void TheVisualsKnobProcessor::publishBuffers(ProcessData& data)
     {
         for (int channel = 0; channel < channelCount; channel++)
         {
@@ -188,14 +234,14 @@ namespace TVK
 
                 accumulators[channel].push_back(sample);
 
-                if (accumulators[channel].size() > dataWindowSize)
+                if (accumulators[channel].size() > bufferSize)
                 {
-                    accumulators[channel].resize(dataWindowSize);
+                    accumulators[channel].resize(bufferSize);
                 }
 
-                if (accumulators[channel].size() == dataWindowSize)
+                if (accumulators[channel].size() == bufferSize)
                 {
-                    fifos[channel].tryPush(accumulators[channel]);
+                    bufferFifos[channel].tryPush(accumulators[channel]);
                     accumulators[channel].clear();
                 }
             }

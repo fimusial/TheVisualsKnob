@@ -2,6 +2,8 @@
 
 #include "public.sdk/source/vst/vstaudioeffect.h"
 
+#include "iaudiodataprovider.h"
+#include "visualizerfactory.h"
 #include "bufferfifo.h"
 
 using namespace Steinberg;
@@ -9,7 +11,9 @@ using namespace Vst;
 
 namespace TVK
 {
-    class TheVisualsKnobProcessor : public AudioEffect
+    class TheVisualsKnobProcessor
+        : public AudioEffect,
+        public IAudioDataProvider
     {
     public:
         TheVisualsKnobProcessor();
@@ -30,15 +34,24 @@ namespace TVK
         tresult PLUGIN_API getState(IBStream* state) SMTG_OVERRIDE;
         tresult PLUGIN_API process(ProcessData& data) SMTG_OVERRIDE;
 
+        int getChannelCount() override;
+        int getBufferSize() override;
+        int getAvailableBufferCount(int channel) override;
+        bool tryGetBuffer(int channel, std::vector<double>& buffer) override;
+        void setSkipBuffers(bool newValue) override;
+        void setBufferSize(int newValue) override;
+
     private:
-        bool skipSilentBlocks = true;
-        int dataWindowSize = 4096;
+        VisualizerFactory visualizerFactory;
+
         int channelCount = 0;
+        int bufferSize = 2048;
+        bool skipSilentBuffers = true;
 
         std::vector<double>* accumulators = nullptr;
-        BufferFifo<double>* fifos = nullptr;
+        BufferFifo<double>* bufferFifos = nullptr;
 
         bool transferToOutput(ProcessData& data);
-        void publishBlocks(ProcessData& data);
+        void publishBuffers(ProcessData& data);
     };
 }

@@ -9,8 +9,8 @@ struct BufferFifo
 {
     bool tryPush(const std::vector<T>& buffer)
     {
-        const size_t write = writeIndex.load(std::memory_order_relaxed);
-        const size_t next = increment(write);
+        const int write = writeIndex.load(std::memory_order_relaxed);
+        const int next = increment(write);
 
         if (next == readIndex.load(std::memory_order_acquire))
         {
@@ -24,7 +24,7 @@ struct BufferFifo
 
     bool tryPull(std::vector<T>& buffer)
     {
-        const size_t read = readIndex.load(std::memory_order_relaxed);
+        const int read = readIndex.load(std::memory_order_relaxed);
 
         if (read == writeIndex.load(std::memory_order_acquire))
         {
@@ -36,10 +36,10 @@ struct BufferFifo
         return true;
     }
 
-    size_t getAvailableReads() const
+    int getAvailablePullCount() const
     {
-        const size_t read = readIndex.load(std::memory_order_acquire);
-        const size_t write = writeIndex.load(std::memory_order_acquire);
+        const int read = readIndex.load(std::memory_order_acquire);
+        const int write = writeIndex.load(std::memory_order_acquire);
 
         return write >= read
             ? write - read
@@ -47,12 +47,12 @@ struct BufferFifo
     }
 
 private:
-    static constexpr size_t Capacity = 32;
+    static constexpr int Capacity = 32;
     std::array<std::vector<T>, Capacity> buffers;
-    std::atomic<size_t> readIndex { 0 };
-    std::atomic<size_t> writeIndex { 0 };
+    std::atomic<int> readIndex { 0 };
+    std::atomic<int> writeIndex { 0 };
 
-    static constexpr size_t increment(size_t index) noexcept
+    static constexpr int increment(int index) noexcept
     {
         return (index + 1) % Capacity;
     }

@@ -27,10 +27,15 @@ smtg_add_vst3plugin(TheVisualsKnob
     source/controller.cpp
     source/controller.h
     source/entry.cpp
+    source/iaudiodataprovider.h
     source/processor.cpp
     source/processor.h
     source/resourcemanager.h
     source/version.h
+    source/visualizerfactory.h
+    source/visualizerfactory.cpp
+    source/waveformvisualizer.cpp
+    source/waveformvisualizer.h
 )
 
 cmrc_add_resource_library(compiled_resources NAMESPACE compiled_resources
