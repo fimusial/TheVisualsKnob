@@ -16,7 +16,7 @@ namespace TVK
                     invalid();
                 }
             },
-            1,
+            8,
             true);
     }
 
@@ -27,7 +27,7 @@ namespace TVK
     void WaveformVisualizer::draw(CDrawContext* context)
     {
         CRect viewSize = getViewSize();
-        context->setFillColor(CColor(0, 0, 0));
+        context->setFillColor(CColor(17, 17, 17));
         context->drawRect(viewSize, kDrawFilled);
         drawWaveform(context);
         setDirty(false);
@@ -60,19 +60,19 @@ namespace TVK
 
         CRect viewSize = getViewSize();
         context->setFrameColor(CColor(0, 255, 0));
-        context->setLineWidth(3.0);
+        context->setLineWidth(2.0);
 
         path->beginSubpath(viewSize.getLeftCenter());
 
         int count = buffer.size();
-        double h = viewSize.getHeight();
+        double h2 = viewSize.getHeight() / 2.0;
         double w = viewSize.getWidth();
         int step = 4;
         for (int i = 0; i < count; i += step)
         {
             path->addLine(CPoint(
                 (double)i * w / (double)count,
-                h / 2.0 + buffer[i] * h / 8.0
+                h2 - buffer[i] * h2
             ));
         }
 
