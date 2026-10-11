@@ -1,4 +1,4 @@
-# The Visuals Knob :fireworks:
+# [WIP] The Visuals Knob :fireworks:
 <p align="right">
 VST3 audio visualizer
 </p>
