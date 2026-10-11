@@ -38,7 +38,7 @@ namespace TVK
         int getBufferSize() override;
         int getAvailableBufferCount(int channel) override;
         bool tryGetBuffer(int channel, std::vector<double>& buffer) override;
-        void setSkipBuffers(bool newValue) override;
+        void setFreezeOnSilence(bool newValue) override;
         void setBufferSize(int newValue) override;
 
     private:
@@ -46,7 +46,7 @@ namespace TVK
 
         int channelCount = 0;
         int bufferSize = 2048;
-        bool skipSilentBuffers = true;
+        bool freezeOnSilence = true;
 
         std::vector<double>* accumulators = nullptr;
         BufferFifo<double>* bufferFifos = nullptr;

@@ -134,7 +134,7 @@ namespace TVK
 
         bool isSilentOrEmpty = transferToOutput(data);
 
-        if (!skipSilentBuffers || !isSilentOrEmpty)
+        if (!freezeOnSilence || !isSilentOrEmpty)
         {
             publishBuffers(data);
         }
@@ -172,9 +172,9 @@ namespace TVK
         return bufferFifos[channel].tryPull(buffer);
     }
 
-    void TheVisualsKnobProcessor::setSkipBuffers(bool newValue)
+    void TheVisualsKnobProcessor::setFreezeOnSilence(bool newValue)
     {
-        skipSilentBuffers = newValue;
+        freezeOnSilence = newValue;
     }
 
     void TheVisualsKnobProcessor::setBufferSize(int newValue)

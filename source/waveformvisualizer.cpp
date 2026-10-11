@@ -9,15 +9,7 @@ namespace TVK
         : CView(CRect()),
         audio(audio)
     {
-        timer = makeOwned<CVSTGUITimer>(
-            [this](auto*) {
-                if (this->audio.tryGetBuffer(0, buffer))
-                {
-                    invalid();
-                }
-            },
-            8,
-            true);
+        startPolling();
     }
 
     WaveformVisualizer::~WaveformVisualizer()
@@ -27,15 +19,66 @@ namespace TVK
     void WaveformVisualizer::draw(CDrawContext* context)
     {
         CRect viewSize = getViewSize();
-        context->setFillColor(CColor(17, 17, 17));
+        context->setFillColor(backgroundColor);
         context->drawRect(viewSize, kDrawFilled);
+
+        alignWaveform();
         drawWaveform(context);
+
         setDirty(false);
+    }
+
+    void WaveformVisualizer::startPolling()
+    {
+        auto poll = [this](auto*)
+        {
+            if (audio.tryGetBuffer(0, newBuffer))
+            {
+                invalid();
+            }
+        };
+
+        timer = makeOwned<CVSTGUITimer>(poll, PollDelayMs, true);
+    }
+
+    void WaveformVisualizer::alignWaveform()
+    {
+        if (newBuffer.size() < 2)
+        {
+            return;
+        }
+
+        int size = newBuffer.size();
+        int shift = 0;
+        double bestError = 4.0 * size;
+
+        oldBuffer.resize(size, 0.0);
+
+        for (int i = 0; i < size; i++)
+        {
+            double totalError = 0.0;
+            for (int j = 0; j < size && totalError < bestError; j += SampleStep)
+            {
+                double error = newBuffer[(i + j) % size] - oldBuffer[j];
+                totalError += error * error;
+            }
+
+            if (totalError < bestError)
+            {
+                bestError = totalError;
+                shift = i;
+            }
+        }
+
+        for (int i = 0; i < size; i++)
+        {
+            oldBuffer[i] = newBuffer[(shift + i) % size];
+        }
     }
 
     void WaveformVisualizer::drawWaveform(CDrawContext* context)
     {
-        if (buffer.size() < 2)
+        if (newBuffer.size() < 2)
         {
             return;
         }
@@ -59,20 +102,20 @@ namespace TVK
         }
 
         CRect viewSize = getViewSize();
-        context->setFrameColor(CColor(0, 255, 0));
-        context->setLineWidth(2.0);
+        context->setFrameColor(waveformColor);
+        context->setLineWidth(waveformThickness);
 
         path->beginSubpath(viewSize.getLeftCenter());
 
-        int count = buffer.size();
-        double h2 = viewSize.getHeight() / 2.0;
-        double w = viewSize.getWidth();
-        int step = 4;
-        for (int i = 0; i < count; i += step)
+        int size = oldBuffer.size();
+        double halfHeight = viewSize.getHeight() / 2.0;
+        double width = viewSize.getWidth();
+
+        for (int i = 0; i < size; i += SampleStep)
         {
             path->addLine(CPoint(
-                (double)i * w / (double)count,
-                h2 - buffer[i] * h2
+                (double)i * width / (double)size,
+                halfHeight - oldBuffer[i] * halfHeight
             ));
         }
 

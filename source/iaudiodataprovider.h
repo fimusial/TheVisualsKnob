@@ -12,7 +12,7 @@ namespace TVK
 
         virtual bool tryGetBuffer(int channel, std::vector<double>& buffer) = 0;
 
-        virtual void setSkipBuffers(bool newValue) = 0;
+        virtual void setFreezeOnSilence(bool newValue) = 0;
         virtual void setBufferSize(int newValue) = 0;
     };
 }

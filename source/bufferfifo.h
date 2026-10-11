@@ -47,7 +47,8 @@ struct BufferFifo
     }
 
 private:
-    static constexpr int Capacity = 32;
+    static const int Capacity = 8;
+
     std::array<std::vector<T>, Capacity> buffers;
     std::atomic<int> readIndex { 0 };
     std::atomic<int> writeIndex { 0 };
