@@ -5,6 +5,8 @@
 !cmrc/
 !resource/
 !source/
+!source/factories
+!source/visualizers
 
 !*.h
 !*.cpp

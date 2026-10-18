@@ -2,6 +2,8 @@
 
 #include "public.sdk/source/vst/vsteditcontroller.h"
 
+#include "factories/switcherfactory.h"
+
 using namespace Steinberg;
 using namespace Vst;
 
@@ -28,5 +30,8 @@ namespace TVK
         DEFINE_INTERFACES
         END_DEFINE_INTERFACES(EditController)
         DELEGATE_REFCOUNT(EditController)
+
+    private:
+        SwitcherFactory switcherFactory;
     };
 }

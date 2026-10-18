@@ -4,7 +4,9 @@
     "bitmaps": {},
     "fonts": {},
     "colors": {},
-    "control-tags": {},
+    "control-tags": {
+      "Visualizer": "256"
+    },
     "custom": {
       "VST3Editor": {
         "Show Editor Button": "false"
@@ -27,9 +29,60 @@
           "wants-focus": "false"
         },
         "children": {
+          "Container": {
+            "attributes": {
+              "class": "UIViewSwitchContainer",
+              "origin": "0, 0",
+              "size": "400, 400",
+              "autosize": "left right top bottom",
+              "template-names": "WaveformTemplate,SpectrogramTemplate",
+              "template-switch-control": "Visualizer",
+              "animation-time": "0"
+            }
+          },
+          "Switcher": {
+            "attributes": {
+              "class": "Switcher",
+              "origin": "0, 0",
+              "size": "400, 400",
+              "autosize": "left right top bottom",
+              "stepCount": "2",
+              "parameterId": "256"
+            }
+          }
+        }
+      },
+      "WaveformTemplate": {
+        "attributes": {
+          "class": "CViewContainer",
+          "origin": "0, 0",
+          "size": "400, 400",
+          "autosize": "left right top bottom",
+          "transparent": "false"
+        },
+        "children": {
           "WaveformVisualizer": {
             "attributes": {
               "class": "WaveformVisualizer",
+              "origin": "0, 0",
+              "size": "400, 400",
+              "autosize": "left right top bottom"
+            }
+          }
+        }
+      },
+      "SpectrogramTemplate": {
+        "attributes": {
+          "class": "CViewContainer",
+          "origin": "0, 0",
+          "size": "400, 400",
+          "autosize": "left right top bottom",
+          "transparent": "false"
+        },
+        "children": {
+          "SpectrogramVisualizer": {
+            "attributes": {
+              "class": "SpectrogramVisualizer",
               "origin": "0, 0",
               "size": "400, 400",
               "autosize": "left right top bottom"

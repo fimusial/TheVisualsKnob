@@ -2,13 +2,26 @@
 
 #include "vstgui/plugin-bindings/vst3editor.h"
 #include "vstgui/uidescription/uicontentprovider.h"
+
+#include "cids.h"
 #include "resourcemanager.h"
 
 namespace TVK
 {
     tresult PLUGIN_API TheVisualsKnobController::initialize(FUnknown* context)
     {
-        return EditControllerEx1::initialize(context);
+        tresult result = EditControllerEx1::initialize(context);
+        if (result != kResultOk)
+        {
+            return result;
+        }
+
+        // title, units, step count, default value normalized, flags, tag
+
+        parameters.addParameter(
+            STR16("Visualizer"), nullptr, 0, 0.0, ParameterInfo::kIsHidden, Visualizer);
+
+        return kResultOk;
     }
 
     tresult PLUGIN_API TheVisualsKnobController::terminate()
@@ -23,21 +36,18 @@ namespace TVK
 
     tresult PLUGIN_API TheVisualsKnobController::setState(IBStream* state)
     {
+        // TODO
         return kResultOk;
     }
 
     tresult PLUGIN_API TheVisualsKnobController::getState(IBStream* state)
     {
+        // TODO
         return kResultOk;
     }
 
-    IPlugView* PLUGIN_API TheVisualsKnobController::createView(FIDString name)
+    IPlugView* PLUGIN_API TheVisualsKnobController::createView(FIDString)
     {
-        if (!FIDStringsEqual(name, Vst::ViewType::kEditor))
-        {
-            return nullptr;
-        }
-
         std::string uiDescriptionContent = ResourceManager::getFileContent("uidesc.json");
         VSTGUI::IContentProvider* contentProvider = new VSTGUI::MemoryContentProvider(
             uiDescriptionContent.c_str(), (unsigned int)uiDescriptionContent.size());

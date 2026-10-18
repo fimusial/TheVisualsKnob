@@ -3,8 +3,10 @@
 #include "public.sdk/source/vst/vstaudioeffect.h"
 
 #include "iaudiodataprovider.h"
-#include "visualizerfactory.h"
 #include "bufferfifo.h"
+
+#include "factories/waveformvisualizerfactory.h"
+#include "factories/spectrogramvisualizerfactory.h"
 
 using namespace Steinberg;
 using namespace Vst;
@@ -42,7 +44,8 @@ namespace TVK
         void setBufferSize(int newValue) override;
 
     private:
-        VisualizerFactory visualizerFactory;
+        WaveformVisualizerFactory waveformVisualizerFactory = WaveformVisualizerFactory(*this);
+        SpectrogramVisualizerFactory spectrogramVisualizerFactory = SpectrogramVisualizerFactory(*this);
 
         int channelCount = 0;
         int bufferSize = 2048;

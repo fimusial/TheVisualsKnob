@@ -32,10 +32,15 @@ smtg_add_vst3plugin(TheVisualsKnob
     source/processor.h
     source/resourcemanager.h
     source/version.h
-    source/visualizerfactory.h
-    source/visualizerfactory.cpp
-    source/waveformvisualizer.cpp
-    source/waveformvisualizer.h
+    source/factories/switcherfactory.h
+    source/factories/spectrogramvisualizerfactory.h
+    source/factories/waveformvisualizerfactory.h
+    source/ui/switcher.cpp
+    source/ui/switcher.h
+    source/ui/spectrogramvisualizer.cpp
+    source/ui/spectrogramvisualizer.h
+    source/ui/waveformvisualizer.cpp
+    source/ui/waveformvisualizer.h
 )
 
 cmrc_add_resource_library(compiled_resources NAMESPACE compiled_resources
@@ -70,6 +75,10 @@ if(MSVC)
     )
 endif()
 
-source_group("Header Files" REGULAR_EXPRESSION ".*/source/.*\\.h$")
-source_group("Source Files" REGULAR_EXPRESSION ".*/source/.*\\.cpp$")
+source_group("Header Files/factories" REGULAR_EXPRESSION ".*/source/factories/.*\\.h$")
+source_group("Header Files/ui" REGULAR_EXPRESSION ".*/source/ui/.*\\.h$")
+
+source_group("Source Files/factories" REGULAR_EXPRESSION ".*/source/factories/.*\\.cpp$")
+source_group("Source Files/ui" REGULAR_EXPRESSION ".*/source/ui/.*\\.cpp$")
+
 source_group("Resources" REGULAR_EXPRESSION ".*/resource/.*$")

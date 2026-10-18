@@ -5,7 +5,6 @@
 namespace TVK
 {
     TheVisualsKnobProcessor::TheVisualsKnobProcessor()
-        : visualizerFactory(*this)
     {
         setControllerClass(kTheVisualsKnobControllerUID);
     }

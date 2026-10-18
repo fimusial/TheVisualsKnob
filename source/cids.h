@@ -1,8 +1,10 @@
 #pragma once
 
 #include "pluginterfaces/base/funknown.h"
+#include "pluginterfaces/vst/vsttypes.h"
 
 using namespace Steinberg;
+using namespace Vst;
 
 namespace TVK
 {
@@ -10,4 +12,9 @@ namespace TVK
     static const FUID kTheVisualsKnobControllerUID(0xA9A0E3E4, 0xF7BF5017, 0xA8771A9B, 0x755A77FF);
 
     #define TheVisualsKnobVST3Category "Fx"
+
+    enum ParameterId : ParamID
+    {
+        Visualizer = 256,
+    };
 }
